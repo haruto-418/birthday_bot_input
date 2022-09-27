@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { GetStaticProps, NextPage } from 'next';
+import { NextPage } from 'next';
+import moment from 'moment';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import {
   Button,
@@ -35,6 +36,7 @@ const Home: NextPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<User>();
@@ -55,6 +57,7 @@ const Home: NextPage = () => {
     setIsButtonLoading(true);
     const res = await axiosInstance.post('/api/users', data);
     if (res.status === 200) {
+      reset();
       setIsButtonLoading(false);
       onClose();
     } else {
@@ -64,6 +67,7 @@ const Home: NextPage = () => {
 
   const deleteUser = async (id: number) => {
     setIsButtonLoading(true);
+    alert();
     const res = await axiosInstance.delete(`/api/users?id=${id}`);
     if (res.status === 200) {
       setIsButtonLoading(false);
@@ -74,7 +78,7 @@ const Home: NextPage = () => {
 
   return (
     <Stack w={{ md: '80%', lg: '50%' }} mx={'auto'} py={20} spacing={4}>
-      <HStack justify={'space-between'}>
+      <HStack justify={'space-between'} px={4}>
         <HStack alignItems={'baseline'} spacing={4}>
           <Heading>Users</Heading>
           <Text fontSize={18}>{`(${users.length})`}</Text>
@@ -101,7 +105,7 @@ const Home: NextPage = () => {
               return (
                 <Tr key={user.id}>
                   <Td>{user.user_name}</Td>
-                  <Td>{user.birthday}</Td>
+                  <Td>{moment(user.birthday).format('YYYY-MM-DD')}</Td>
                   <Td>
                     <Button
                       bg={'red.200'}
@@ -168,15 +172,6 @@ const Home: NextPage = () => {
       </Modal>
     </Stack>
   );
-};
-
-export const getStaticProps: GetStaticProps = async () => {
-  try {
-    const res = await axiosInstance.get('/api/users');
-    return { props: { data: res.data } };
-  } catch (err) {
-    throw new Error(`error at index.tsx getStaticProps: ${err}`);
-  }
 };
 
 export default Home;
